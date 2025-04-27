@@ -1,49 +1,45 @@
 "use client";
-import { useSignUp } from "@clerk/nextjs";
-import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useSignIn } from "@clerk/nextjs";
+import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function CustomSignUp() {
-  const { isLoaded, signUp, setActive } = useSignUp();
+export default function CustomLogin() {
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isLoaded) {
-      return alert("Loading...");
-      // need to add a loader
-    }
+    if (!isLoaded) return;
+
     try {
-      await signUp.create({ emailAddress: email, password: password });
-      await signUp.prepareEmailAddressVerification({
-        strategy: "email_code",
-      });
-      router.push("/verify-email");
-      console.log("Verification email sent");
-    } catch (error) {
-      console.log("Error signing up", error);
+      const result = await signIn.create({ identifier: email, password });
+      await setActive({ session: result.createdSessionId });
+      router.push("/feed"); // Redirect to home after login
+    } catch (err) {
+      console.error(err);
     }
   }
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-8 shadow-xl transition-all duration-300 hover:shadow-2xl">
         <div className="space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-semibold text-gray-800">
-              Welcome To Pixi
+              Welcome Back To Pixi
             </h1>
             <p className="mt-2 text-gray-600">
-              Already have an account?{" "}
+              Don't have an account?{" "}
               <Link
-                href="/log-in"
+                href="/sign-up"
                 className="font-medium text-fuchsia-600 hover:text-fuchsia-500"
               >
-                Log in
+                Sign up
               </Link>
             </p>
           </div>
@@ -101,7 +97,7 @@ export default function CustomSignUp() {
               type="submit"
               className="group relative w-full overflow-hidden rounded-md bg-fuchsia-500 py-3 text-center font-bold text-white transition-all duration-300"
             >
-              <span className="relative z-10">Sign up</span>
+              <span className="relative z-10">Log In</span>
               <span className="absolute inset-0 -z-10 translate-y-full transform bg-pink opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100"></span>
             </button>
           </form>
