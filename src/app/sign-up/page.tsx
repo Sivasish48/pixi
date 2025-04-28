@@ -2,22 +2,27 @@
 import { useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import PinkLoader from "../component/Loader";
 
 export default function CustomSignUp() {
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { isLoaded, signUp } = useSignUp();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     if (!isLoaded) {
-      return alert("Loading...");
-      // need to add a loader
+      return;
     }
+
+    setLoading(true); // 👈 Immediately show loader when user clicks submit
+
     try {
       await signUp.create({ emailAddress: email, password: password });
       await signUp.prepareEmailAddressVerification({
@@ -26,9 +31,19 @@ export default function CustomSignUp() {
       router.push("/verify-email");
       console.log("Verification email sent");
     } catch (error) {
-      console.log("Error signing up", error);
+      console.error("Error signing up", error);
+      setLoading(false); // 👈 If error happens, hide the loader
     }
   }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400">
+        <PinkLoader />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-8 shadow-xl transition-all duration-300 hover:shadow-2xl">
@@ -68,18 +83,16 @@ export default function CustomSignUp() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-              </div>
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
               <div className="relative">
                 <input
                   id="password"
-                  type={showPassword ? "password" : "text"}
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -90,9 +103,9 @@ export default function CustomSignUp() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  aria-label={showPassword ? "Show password" : "Hide password"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>

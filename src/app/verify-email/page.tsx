@@ -4,6 +4,7 @@ import { useSignUp } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import PinkLoader from "../component/Loader";
 
 export default function VerifyEmailPage() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -11,6 +12,7 @@ export default function VerifyEmailPage() {
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // 👈 ADD loading state
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export default function VerifyEmailPage() {
       });
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        router.push("/dashboard");
+        router.push("/feed");
       } else {
         setError("Verification failed. Redirecting to signup...");
         setTimeout(() => {
@@ -41,6 +43,14 @@ export default function VerifyEmailPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400">
+        <PinkLoader />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400 p-4">

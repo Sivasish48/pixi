@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSignIn } from "@clerk/nextjs";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import PinkLoader from "../component/Loader";
 
 export default function CustomLogin() {
   const { isLoaded, signIn, setActive } = useSignIn();
@@ -11,18 +12,30 @@ export default function CustomLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // 👈 ADD loading state
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isLoaded) return;
 
+    setLoading(true); // 👈 Start loading before API call
     try {
       const result = await signIn.create({ identifier: email, password });
       await setActive({ session: result.createdSessionId });
-      router.push("/feed"); // Redirect to home after login
+      router.push("/feed"); // Redirect after login
     } catch (err) {
       console.error(err);
+      setLoading(false); // 👈 Stop loading if error
     }
+  }
+
+  // 👇 Loading screen
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-400">
+        <PinkLoader />
+      </div>
+    );
   }
 
   return (

@@ -3,9 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
+  --pink-loader-bg: #ff80b3;
+  --pink-loader-line: #fff0f5;
 
-@theme inline {
+  /* Move theme variables directly into root */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -16,6 +17,8 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --pink-loader-bg: #ff80ab;
+    --pink-loader-line: #fff0f5;
   }
 }
 
@@ -23,4 +26,50 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom animations for Pink Loader */
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes move {
+  0%,
+  100% {
+    height: 100px;
+  }
+  50% {
+    height: 40px;
+  }
+}
+
+@layer utilities {
+  /* Custom animation utilities */
+  .animate-rotate {
+    animation: rotate 6s linear infinite;
+  }
+
+  .animate-move {
+    animation: move 2s infinite;
+  }
+
+  .animate-move-delayed {
+    animation: move 2s infinite 1s;
+  }
+
+  /* Custom transform origin */
+  .origin-top-center {
+    transform-origin: 50% 0%;
+  }
+
+  /* Pink loader specific classes */
+  .bg-pink-loader {
+    background-color: var(--pink-loader-bg);
+  }
+
+  .bg-pink-loader-line {
+    background-color: var(--pink-loader-line);
+  }
 }
