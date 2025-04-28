@@ -1,0 +1,58 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  clerkUserId  String  @unique
+  username     String? @unique
+  bio          String?
+  profileImage String?
+
+  posts      Post[]      @relation("UserPosts")
+  savedPosts SavedPost[] @relation("UserSavedPosts")
+  followers  Follow[]    @relation("UserFollowers")
+  following  Follow[]    @relation("UserFollowing")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  content    String
+  image      String?
+  author     User        @relation(fields: [authorId], references: [id], name: "UserPosts")
+  authorId   String      @db.ObjectId
+  savedPosts SavedPost[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model SavedPost {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], name: "UserSavedPosts")
+  userId String @db.ObjectId
+  post   Post   @relation(fields: [postId], references: [id])
+  postId String @db.ObjectId
+
+  createdAt DateTime @default(now())
+}
+
+model Follow {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  follower    User   @relation("UserFollowers", fields: [followerId], references: [id])
+  followerId  String @db.ObjectId
+  following   User   @relation("UserFollowing", fields: [followingId], references: [id])
+  followingId String @db.ObjectId
+
+  createdAt DateTime @default(now())
+}
